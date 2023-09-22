@@ -129,12 +129,19 @@ function nueva_cuenta() {
 
 // MENU INGRESAR CON CUENTA DE USUARIO EXISTENTE
 function ingresar_cuenta_existente() {
+    // Definicion de variables locales.
     let l_email
     let l_password
     let l_indice_cta
+    let l_indice_pwd
+    let l_existe
+    let l_respuesta_entrada
+    let l_entrada = false
+    let l_iteraciones = 0
+
 
     // Entrada de mail.
-    let l_respuesta_entrada = entrada_datos('Ingrese una dirección de email existente',['pos','@'],0)
+    l_respuesta_entrada = entrada_datos('Ingrese una dirección de email existente',['pos','@'],0)
     
     if (l_respuesta_entrada === '(cancela)') {
         menu_principal()
@@ -142,25 +149,45 @@ function ingresar_cuenta_existente() {
     l_email = l_respuesta_entrada
 
     // Busca en array si el mail esta registrado.
-    let l_existe = buscar_en_array_cuentas_usuarios(l_email,0)
+    l_existe = buscar_en_array_cuentas_usuarios(l_email,0)
     
+    alert(l_existe.substring(0,2))
     if (l_existe.substring(0,2) == 'OK') {
                 
         // Recupera el indice del array de la cuenta de usuario.
         l_indice_cta = l_existe.substring(2,l_existe.length)
         
-        // Entrada de password.
-        let l_respuesta_entrada = entrada_datos('Ingrese una contraseña existente',[],0)
-    
-        if (l_respuesta_entrada === '(cancela)') {
-            menu_principal()
-        }
-        l_password = l_respuesta_entrada
+        
+        do {
+            
+            // Incrementa contador de iteraciones.
+            l_iteraciones++
 
-        /* // Busca en array si el mail esta registrado.
-        let l_existe_sn = buscar_en_array_cuentas_usuarios(l_password,2)
-        if (l_existe_sn) {
-        } */
+            // Entrada de password.
+            l_respuesta_entrada = entrada_datos('Ingrese una contraseña existente (intento '+l_iteraciones+' de 3)',[],0)
+        
+            if (l_respuesta_entrada === '(cancela)') {
+                menu_principal()
+                break
+            }
+            l_password = l_respuesta_entrada
+
+            // Busca en array si la contraseña esta registrada.
+            l_existe = buscar_en_array_cuentas_usuarios(l_password,1)
+            if (l_existe.substring(0,2) == 'OK') {
+                l_indice_pwd = l_existe.substring(2,l_existe.length)
+                if (l_indice_cta !== l_indice_pwd) {
+                    alert('El usuario no coincide con la contraseña ingresada...')
+                } else {
+                    alert('Bienvenido "'+l_email+'"...')
+                    break
+                }
+
+            } else {
+                alert('Contraseña inválida...')
+            }
+            
+        } while (l_iteraciones < 3 && l_entrada == false );
     }
 
 
