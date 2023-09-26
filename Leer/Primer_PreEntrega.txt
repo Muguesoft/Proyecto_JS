@@ -1,0 +1,17 @@
+Explicación:
+Mi proyecto de Web Devolper fue una pagina Portfolio de mi hooby que es la fotografía. (https://muguesoft.github.io/Proyecto_Coder/)
+
+El proyecto de JS es sobre un carrito de compras que permita la selección y pago de fotografías para realizar impresión de las mismas.
+
+Aunque es mi primera vez con JS soy Analista Universitario de Sistemas, con mas de 30 años en la profesión.
+Estoy muy familiarizado con la programacion estructurada orientada a objetos. En mi empresa programamos con PowerBuilder 2019 R3 (cliente/servidor principalmente).
+
+Utilicé algunos herramientas que aún no hemos visto como los ARRAYS y la RECURSIVIDAD.
+
+Las variables de scope local las llame con l_... y las variables globales con g_...
+
+PARA LA PRUEBA:
+- Hay definido un array global simulando una Base de Datos con 3 mails y contraseñas (usuarios existentes)
+	1) cmouguelar@gmail - Ramiro
+	2) prueba@gmail.com - prueba
+	3) coder@gmail.com - coder

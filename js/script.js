@@ -157,7 +157,9 @@ function ingresar_nueva_cuenta() {
     
     if (l_respuesta_entrada === '(cancela)') {
         mostrar_menu_principal()
+        return
     }
+
     l_email = l_respuesta_entrada
 
     // Evalua si ya existe.
@@ -167,6 +169,7 @@ function ingresar_nueva_cuenta() {
     if (l_existe.substring(0,2) == 'OK') {
         alert('La cuenta que desea crear "'+l_email+'" ya se encuentra registrada...')
         mostrar_menu_principal()
+        return
     }
 
     // Entrada de password.
@@ -174,6 +177,7 @@ function ingresar_nueva_cuenta() {
     
     if (l_respuesta_entrada === '(cancela)') {
         mostrar_menu_principal()
+        return
     }
     l_password = l_respuesta_entrada
 
@@ -205,6 +209,7 @@ function ingresar_cuenta_existente() {
     
     if (l_respuesta_entrada === '(cancela)') {
         mostrar_menu_principal()
+        return
     }
     l_email = l_respuesta_entrada
 
@@ -226,7 +231,7 @@ function ingresar_cuenta_existente() {
         
             if (l_respuesta_entrada === '(cancela)') {
                 mostrar_menu_principal()
-                break
+                return
             }
             l_password = l_respuesta_entrada
 
@@ -252,14 +257,17 @@ function ingresar_cuenta_existente() {
             alert('Bienvenido "'+l_email+'"...')
             // INICIA MENU DE COMPRAS.
             ingresar_menu_compras()
+            return
         } else {
             alert('Máxima cantidad de intentos alcanzada!')
             mostrar_menu_principal()
+            return
         }
 
     } else {
         alert('Usuario inexistente...')
         ingresar_cuenta_existente()
+        return
     }
 }
 // FIN MENU INGRESAR CON CUENTA DE USUARIO EXISTENTE
@@ -324,9 +332,15 @@ function ingresar_menu_compras(){
     l_menu_compras =  armar_string_menu_compras()
     let l_respuesta_entrada = realizar_entrada_datos(l_menu_compras,['copias'])
     
+    if(l_respuesta_entrada === '(cancela)'){
+        ingresar_menu_compras()
+        return
+    }
+
     if (l_respuesta_entrada.toLowerCase() === 'f') {
         // Finaliza la compra.
         finalizar_compra()
+        return
     } else {
 
         // Descompone la entrada y procesa.
@@ -418,33 +432,21 @@ function finalizar_compra() {
     let l_precio_unitario
 
     for (let l_i = 0; l_i < g_carrito.length; l_i++) {
-        //alert(l_i)
         
         l_nro_foto = g_carrito[l_i][0]
-        //alert('n°:'+l_nro_foto)
-        
         l_cantidad = g_carrito[l_i][1]
-        //alert('cant:'+l_cantidad)
-
         l_desc_foto = g_fotos_valores[l_nro_foto - 1][0]
-        //alert('Desc: '+l_desc_foto)
-
         l_precio_unitario = g_fotos_valores[l_nro_foto - 1][1]
-        //alert('PU '+l_precio_unitario)
-        
-
         
         // Pueden haber quedado fotos con cantidad 0
         if (l_cantidad === 0) {
             continue
         } else {
             l_idx++
-            alert(l_idx)
-
+            
             // Acumula el total a pagar.
             l_total_gral = l_total_gral + (l_cantidad * l_precio_unitario)
-            alert(l_total_gral)
-
+            
             // Arma string del carrito de compras.
             if (l_idx === 1) {
                 l_string_carrito = 'FOTOGRAFIAS A IMPRIMIR:'
@@ -456,7 +458,7 @@ function finalizar_compra() {
     }
 
     if (l_idx > 0) {
-        alert(l_string_carrito+'\n\nTOTAL GENERAL $: '+l_total_gral)
+        l_string_carrito = l_string_carrito+'\n\nTOTAL GENERAL $: '+l_total_gral
 
         l_string_carrito = l_string_carrito + '\n\nINGRESE UNA OPCION:\n1: Pagar\n2: Seguir comprando'
         let l_respuesta_entrada = realizar_entrada_datos(l_string_carrito,['1','2'])
