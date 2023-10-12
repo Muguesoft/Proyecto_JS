@@ -164,7 +164,7 @@ function ingresar_nueva_cuenta() {
 
     // Evalua si ya existe.
     // Busca en array si el mail esta registrado.
-    l_existe = buscar_en_array_cuentas_usuarios(l_email,0)
+    l_existe = buscar_en_array_cuentas_usuarios(l_email,'usuario')
     
     if (l_existe.substring(0,2) == 'OK') {
         alert('La cuenta que desea crear "'+l_email+'" ya se encuentra registrada...')
@@ -181,10 +181,19 @@ function ingresar_nueva_cuenta() {
     }
     l_password = l_respuesta_entrada
 
+    const l_nuevo_usuario = {
+        l_email,
+        l_password
+    }
+
+
     // Registra en array global de cuentas.
-    g_usuarios_validos.push([l_email,l_password])
+    g_usuarios_validos.push(l_nuevo_usuario)
+    
 
     alert('Bienvenido "'+l_email+'"...')
+    
+
     // INICIA MENU DE COMPRAS.
     ingresar_menu_compras()
 }    
@@ -214,7 +223,7 @@ function ingresar_cuenta_existente() {
     l_email = l_respuesta_entrada
 
     // Busca en array si el mail esta registrado.
-    l_existe = buscar_en_array_cuentas_usuarios(l_email,0)
+    l_existe = buscar_en_array_cuentas_usuarios(l_email,'usuario')
     
     if (l_existe.substring(0,2) == 'OK') {
                 
@@ -236,7 +245,7 @@ function ingresar_cuenta_existente() {
             l_password = l_respuesta_entrada
 
             // Busca en array si la contraseña esta registrada.
-            l_existe = buscar_en_array_cuentas_usuarios(l_password,1)
+            l_existe = buscar_en_array_cuentas_usuarios(l_password,'pass')
             if (l_existe.substring(0,2) == 'OK') {
                 l_indice_pwd = l_existe.substring(2,l_existe.length)
                 if (l_indice_cta !== l_indice_pwd) {
@@ -278,40 +287,45 @@ function armar_string_menu_compras(){
     let l_menu = 'SELECCIONE QUE FOTOGRAFIAS DESEA IMPRIMIR\n(Formato ingreso: N°foto*cantidad - Ej. 3*2 - Foto N°3, 2 copias - si la cantida es negativa restará esas copias) \n\n'
 
     let l_foto
-
+    let l_precio_unitario
+    
     for (let index = 0; index < g_fotos_valores.length; index++) {
-        l_foto = g_fotos_valores[index][0]
+        l_foto = g_fotos_valores[index].descripcion
+        l_precio_unitario = g_fotos_valores[index].precio_neto
+
+        //alert(l_foto)
 
         switch (index) {
             case 0:
-                l_menu = l_menu+'Paisajes: \n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'Paisajes: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
 
             case 1:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
 
             case 2:
-                l_menu = l_menu+'\n\nProductos: \n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n\nProductos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
 
             case 3:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
 
             case 4:
-                l_menu = l_menu+'\n\nAbstractas: \n'+(index+1)+': '+ l_foto        
+                l_menu = l_menu+'\n\nAbstractas: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario        
                 break;
 
             case 5:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
 
             case 6:
-                l_menu = l_menu+'\n\nRetratos: \n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n\nRetratos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
+
             case 7:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
                 break;
         
             default:
@@ -365,52 +379,53 @@ function ingresar_menu_compras(){
 // FUNCION DE CARGA O DESCARGA A CARRITO DE COMPRAS.
 function procesar_carrito_compras(a_foto,a_cantidad_imprimir) {
     let l_cant_fotos = g_carrito.length
-    
+    let l_id_foto
+    let l_foto_encontrada
+
     // Es la primer entrada al array?
     if (l_cant_fotos === 0) {
         if (a_cantidad_imprimir < 0) {
             alert('Para la foto N° "'+a_foto+'" no hay cantidades ingresadas a imprimir; por lo tanto, no puede descontar cantidades...')
         } else {
 
+            l_id_foto = `ph#${a_foto}`
+            
             // Carga array con la primer entrada.
-            g_carrito.push([a_foto,a_cantidad_imprimir])
-            alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1][0]+'" agregada para imprimir '+a_cantidad_imprimir+' copias...')
+            g_carrito.push({id: l_id_foto, cantidad: a_cantidad_imprimir})
+            alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1].descripcion+'" agregada para imprimir '+a_cantidad_imprimir+' copias...')
         }
 
     } else {
         
-        let l_foto_encontrada
-
         // Recorre array buscando entrada de foto anterior.
-        for (let index = 0; index < g_carrito.length; index++) {
+        const l_foto_buscada = 'ph#'+a_foto
+        
+        l_foto_encontrada = g_carrito.findIndex((foto) => foto.id === 'ph#'+a_foto)
+        
+        if (l_foto_encontrada == -1) {
+            l_id_foto = `ph#${a_foto}`
             
-            // Coincide la foto ingresada con alguna del array de cantidades a imprimir?
-            if (g_carrito[index][0] == a_foto) {
-                l_foto_encontrada = true
+            // Carga array con la primer entrada.
+            g_carrito.push({id: l_id_foto, cantidad: a_cantidad_imprimir})
+            alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1].descripcion+'" agregada para imprimir '+a_cantidad_imprimir+' copias...')
+        } else {
+            
+            if (a_cantidad_imprimir > 0) {
+                // Incrementa las cantidades.
+                g_carrito[l_foto_encontrada].cantidad = g_carrito[l_foto_encontrada].cantidad + a_cantidad_imprimir
+                alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1].descripcion+'" tiene '+g_carrito[l_foto_encontrada].cantidad+' copias para imprimir...')
+            } else {
 
-                if (a_cantidad_imprimir > 0) {
-                    // Incrementa las cantidades.
-                    g_carrito[index][1] = g_carrito[index][1] + a_cantidad_imprimir
-                    alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1][0]+'" tiene '+g_carrito[index][1]+' copias para imprimir...')
+                // Si la cantidad es negativa verifica que no sea mayor a la cantidad ingresada
+                let l_absoluto
+                l_absoluto = Math.abs(a_cantidad_imprimir)
+                if(l_absoluto <= g_carrito[l_foto_encontrada].cantidad) {
+                    g_carrito[l_foto_encontrada].cantidad = g_carrito[l_foto_encontrada].cantidad - l_absoluto
+                    alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1].descripcion+'" tiene '+g_carrito[l_foto_encontrada].cantidad+' copias para imprimir...')
                 } else {
-
-                    // Si la cantidad es negativa verifica que no sea mayor a la cantidad ingresada
-                    let l_absoluto
-                    l_absoluto = Math.abs(a_cantidad_imprimir)
-                    if(l_absoluto <= g_carrito[index][1]) {
-                        g_carrito[index][1] = g_carrito[index][1] - l_absoluto
-                        alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1][0]+'" tiene '+g_carrito[index][1]+' copias para imprimir...')
-                    } else {
-                        alert('La foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1][0]+'" tiene '+g_carrito[index][1]+' para imprimir; no se pueden descontar '+l_absoluto+' copias...')
-                    }
+                    alert('La foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1].descripcion+'" tiene '+g_carrito[l_foto_encontrada].cantidad+' para imprimir; no se pueden descontar '+l_absoluto+' copias...')
                 }
             }
-        }
-        
-        if (!l_foto_encontrada) {
-            // Carga array con la primer entrada.
-            g_carrito.push([a_foto,a_cantidad_imprimir])
-            alert('Foto N°'+a_foto+': "'+g_fotos_valores[a_foto - 1][0]+'" agregada para imprimir '+a_cantidad_imprimir+' copias...')
         }
     }
 
@@ -430,13 +445,15 @@ function finalizar_compra() {
     let l_string_carrito
     let l_idx = 0
     let l_precio_unitario
+    let l_id_foto
 
     for (let l_i = 0; l_i < g_carrito.length; l_i++) {
         
-        l_nro_foto = g_carrito[l_i][0]
-        l_cantidad = g_carrito[l_i][1]
-        l_desc_foto = g_fotos_valores[l_nro_foto - 1][0]
-        l_precio_unitario = g_fotos_valores[l_nro_foto - 1][1]
+        l_id_foto = g_carrito[l_i].id
+        l_nro_foto = g_fotos_valores.findIndex((foto) => foto.id === l_id_foto)
+        l_cantidad = g_carrito[l_i].cantidad
+        l_desc_foto = g_fotos_valores[l_nro_foto].descripcion
+        l_precio_unitario = g_fotos_valores[l_nro_foto].precio_neto
         
         // Pueden haber quedado fotos con cantidad 0
         if (l_cantidad === 0) {
@@ -450,15 +467,17 @@ function finalizar_compra() {
             // Arma string del carrito de compras.
             if (l_idx === 1) {
                 l_string_carrito = 'FOTOGRAFIAS A IMPRIMIR:'
-                l_string_carrito = l_string_carrito + '\n\n'+'> Foto N°'+l_nro_foto+' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal: $'+(l_cantidad * l_precio_unitario)
+                l_string_carrito = l_string_carrito + '\n\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+(l_cantidad * l_precio_unitario)
             } else {
-                l_string_carrito = l_string_carrito+'\n'+'> Foto N°'+l_nro_foto+' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal: $'+(l_cantidad * l_precio_unitario)
+                l_string_carrito = l_string_carrito+'\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+(l_cantidad * l_precio_unitario)
             }
         }
     }
 
     if (l_idx > 0) {
-        l_string_carrito = l_string_carrito+'\n\nTOTAL GENERAL $: '+l_total_gral
+
+        l_string_carrito += '\n\nSUBTOTAL NETO $: '+l_total_gral.toFixed(2)
+        l_string_carrito += '\nTOTAL IVA INCLUIDO (21%) $: '+parseFloat(l_total_gral * 1.21).toFixed(2)
 
         l_string_carrito = l_string_carrito + '\n\nINGRESE UNA OPCION:\n1: Pagar\n2: Seguir comprando'
         let l_respuesta_entrada = realizar_entrada_datos(l_string_carrito,['1','2'])
@@ -508,16 +527,21 @@ function finalizar_compra() {
 
 // BUSCA EN ARRAY DE USUARIOS VALIDOS.
 function buscar_en_array_cuentas_usuarios(a_valor, a_columna){
-    let l_valor_array
     
-    for (let i = 0; i < g_usuarios_validos.length; i++) {
-        l_valor_array = g_usuarios_validos[i][a_columna]
-        
-        if ( l_valor_array == a_valor) {
-            return 'OK'+i
-        }
+    let l_pos
+
+    if (a_columna === 'usuario') {
+        l_pos = g_usuarios_validos.findIndex((usuarios) => usuarios.id.toLowerCase() === a_valor.toLowerCase());
+    } else {
+        l_pos = g_usuarios_validos.findIndex((usuarios) => usuarios.pass === a_valor);
     }
-    return 'XX'
+    
+    if (l_pos !== -1) {
+        return 'OK'+l_pos
+    } else {
+        return 'XX'
+    }
+
 }
 // FIN BUSCA EN ARRAY DE USUARIOS VALIDOS.
 
@@ -532,23 +556,56 @@ function buscar_en_array_cuentas_usuarios(a_valor, a_columna){
 //////////////////////////////////////////////////////
 // Se inicializa en una variable global de tipo array
 // simulando Base de Datos con usuario (mail) y contraseña
-let g_usuarios_validos = [];
-g_usuarios_validos.push(['cmouguelar@gmail.com','Ramiro'])
-g_usuarios_validos.push(['prueba@gmail.com','prueba'])
-g_usuarios_validos.push(['coder@gmail.com','coder'])
+// SE USARA UN OBJETO
+let g_usuarios_validos = [
+    {   id: 'cmouguelar@gmail.com',
+        pass: 'Ramiro' },
+    {
+        id: 'prueba@gmail.com',
+        pass: 'prueba' },
+    {
+        id: 'coder@gmail.com',
+        pass: 'coder'
+    }
+];
+
+
 
 
 // En array se almacenan los costos de las fotos a imprimir
-let g_fotos_valores = [];
-g_fotos_valores.push(['Nevado',5000])
-g_fotos_valores.push(['Mar',5000])
-g_fotos_valores.push(['Plato de frutos rojos',6500])
-g_fotos_valores.push(['Bijouterie',6500])
-g_fotos_valores.push(['Hojas en estanque',7000])
-g_fotos_valores.push(['Arena negra',7000])
-g_fotos_valores.push(['Familia en el mar',9300])
-g_fotos_valores.push(['Hombre fumando',9300])
+let g_fotos_valores = [
+    {   id: 'ph#1',
+        descripcion: 'Nevado',
+        precio_neto: 5217.78},
 
+    {   id: 'ph#2',
+        descripcion: 'Mar',
+        precio_neto: 5217.78},
+
+    {   id: 'ph#3',
+        descripcion: 'Plato de frutos rojos',
+        precio_neto: 6480.24},
+
+    {   id: 'ph#4',
+        descripcion: 'Bijouterie',
+        precio_neto: 6480.24},
+
+    {   id: 'ph#5',
+        descripcion: 'Hojas en estanque',
+        precio_neto: 7327.43},
+
+    {   id: 'ph#6',
+        descripcion: 'Arena negra',
+        precio_neto: 7327.43},
+
+    {   id: 'ph#7',
+        descripcion: 'Familia en el mar',
+        precio_neto: 9345.54},
+
+    {   id: 'ph#8',
+        descripcion: 'Hombre fumando',
+        precio_neto: 9345.54}
+ ];
 
 // VARIABLE GLOBAL DONDE SE ALMACENARAN CADA FOTO y LA CANTIDAD A IMPRIMIR.
 // EN LA PRIMER COLUMNA SE ALMACENARA EL N° DE FOTO y EN LA SEGUNDA LA CANTIDAD A IMPRIMIR.
