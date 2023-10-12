@@ -297,35 +297,35 @@ function armar_string_menu_compras(){
 
         switch (index) {
             case 0:
-                l_menu = l_menu+'Paisajes: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'Paisajes: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 1:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 2:
-                l_menu = l_menu+'\n\nProductos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n\nProductos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 3:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 4:
-                l_menu = l_menu+'\n\nAbstractas: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario        
+                l_menu = l_menu+'\n\nAbstractas: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)        
                 break;
 
             case 5:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 6:
-                l_menu = l_menu+'\n\nRetratos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n\nRetratos: \n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
 
             case 7:
-                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+l_precio_unitario
+                l_menu = l_menu+'\n'+(index+1)+': '+ l_foto + ' - P. Neto $'+g_formato_numerico.format(l_precio_unitario)
                 break;
         
             default:
@@ -446,6 +446,11 @@ function finalizar_compra() {
     let l_idx = 0
     let l_precio_unitario
     let l_id_foto
+    
+    // Ordena Array por ID de foto dejando sin efecto
+    // el orden en que se hayan comprado las fotos por
+    // el usuario.
+    g_carrito.sort((a, b) => a.id.localeCompare(b.id))
 
     for (let l_i = 0; l_i < g_carrito.length; l_i++) {
         
@@ -467,17 +472,17 @@ function finalizar_compra() {
             // Arma string del carrito de compras.
             if (l_idx === 1) {
                 l_string_carrito = 'FOTOGRAFIAS A IMPRIMIR:'
-                l_string_carrito = l_string_carrito + '\n\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+(l_cantidad * l_precio_unitario)
+                l_string_carrito = l_string_carrito + '\n\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+g_formato_numerico.format(l_precio_unitario)+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+g_formato_numerico.format((l_cantidad * l_precio_unitario))
             } else {
-                l_string_carrito = l_string_carrito+'\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+l_precio_unitario+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+(l_cantidad * l_precio_unitario)
+                l_string_carrito = l_string_carrito+'\n'+'> Foto N°'+parseInt(l_nro_foto + 1) + ' "'+l_desc_foto+'" ($'+g_formato_numerico.format(l_precio_unitario)+') - Cant. imprimir: '+l_cantidad+' - Subtotal Neto: $'+g_formato_numerico.format((l_cantidad * l_precio_unitario))
             }
         }
     }
 
     if (l_idx > 0) {
 
-        l_string_carrito += '\n\nSUBTOTAL NETO $: '+l_total_gral.toFixed(2)
-        l_string_carrito += '\nTOTAL IVA INCLUIDO (21%) $: '+parseFloat(l_total_gral * 1.21).toFixed(2)
+        l_string_carrito += '\n\nTOTAL NETO $: '+g_formato_numerico.format(l_total_gral.toFixed(2))
+        l_string_carrito += '\nTOTAL IVA INCLUIDO (21%) $: '+g_formato_numerico.format(parseFloat(l_total_gral * 1.21).toFixed(2))
 
         l_string_carrito = l_string_carrito + '\n\nINGRESE UNA OPCION:\n1: Pagar\n2: Seguir comprando'
         let l_respuesta_entrada = realizar_entrada_datos(l_string_carrito,['1','2'])
@@ -610,6 +615,10 @@ let g_fotos_valores = [
 // VARIABLE GLOBAL DONDE SE ALMACENARAN CADA FOTO y LA CANTIDAD A IMPRIMIR.
 // EN LA PRIMER COLUMNA SE ALMACENARA EL N° DE FOTO y EN LA SEGUNDA LA CANTIDAD A IMPRIMIR.
 let g_carrito = []
+
+// FORMATO NUMERICO CON . COMO SEPARADOR DE MILES
+// Y , COMO SEPARADOR DE DECIMALES
+const g_formato_numerico = new Intl.NumberFormat('es-AR');
 
 // INICIA CON MENU PRINCIPAL.
 mostrar_menu_principal()
